@@ -8,7 +8,7 @@ module.exports = {
   },
   output: {
     filename: `[name].${version}.js`,
-    path: Path.resolve(__dirname, "../dist"),
+    path: Path.resolve(__dirname, "../release"),
     environment: {
       arrowFunction: false,
       bigIntLiteral: false,
