@@ -1,21 +1,50 @@
 export type StyleArgs = {
-  "background"?: string
+  "background"?: string,
+  "display"?: string,
+  "width"?: string
+}
+
+class EmeStyle {
+  private style: StyleArgs = {
+    "background": "white",
+    "display": "inline-block",
+    "width": "100%"
+  }
+  innerStyle() {
+    return (Object.keys(this.style) as (keyof typeof this.style)[]).reduce((acc, key) => {
+      return `${acc}${key}:${this.style[key]};`;
+    }, "");
+  }
+  setCustomStyle(customStyle: StyleArgs | string) {
+    if(typeof customStyle === "string") {
+      customStyle.split(";").forEach((styleRow) => {
+        const [styleKey, styleValue] = styleRow.split(":") as [keyof typeof this.style, typeof this.style[keyof typeof this.style]];
+        if(styleValue !== undefined)
+          this.style[styleKey] = styleValue;
+      });
+    } else {
+      (Object.keys(customStyle) as (keyof StyleArgs)[]).forEach((styleKey) => {
+        this.style[styleKey] = customStyle[styleKey];
+      });
+    }
+  }
 }
 
 export default class Eme {
+  private element: Element;
+  private style: EmeStyle = new EmeStyle();
+
   constructor(element: Element, style?: StyleArgs) {
-    element.setAttribute("contenteditable", "true");
-    // element.setAttribute("style", this.innerStyle());
-  }
-  style(): StyleArgs {
-    return {
-      "background": "white"
+    this.element = element;
+    
+    const innerEmeStyle = element.getAttribute("eme:style");
+    if(innerEmeStyle !== null) {
+      this.style.setCustomStyle(innerEmeStyle);
+    } else if(style !== undefined) {
+      this.style.setCustomStyle(style);
     }
-  }
-  innerStyle() {
-    const style = this.style();
-    return (Object.keys(style) as (keyof typeof style)[]).reduce((acc, key) => {
-      return `${acc}${key}:${style[key]};`;
-    }, "");
+
+    element.setAttribute("contenteditable", "true");
+    element.setAttribute("style", this.style.innerStyle());
   }
 }
