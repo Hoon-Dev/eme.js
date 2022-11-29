@@ -1,4 +1,5 @@
-import Eme from "./eme";
+import { Eme } from "./core/eme";
+import "./assets/css/style.css";
 
 window.onload = initialize;
 
