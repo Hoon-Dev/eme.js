@@ -1,4 +1,5 @@
 import { EmeStyle, StyleArgs } from "./emeStyle";
+import { EmeError } from "../error/index";
 
 export class Eme {
   // eme root dom
@@ -10,27 +11,49 @@ export class Eme {
   // key state
   private shiftState: boolean = false;
 
-  constructor(rootElement: HTMLElement, style?: StyleArgs) {
-    rootElement.classList.add("eme-editor");
-    this.rootElement = rootElement;
+  /**
+   * EmeLine 생성자
+   * @param rootElementID Eme Editor의 Dom 엘리먼트의 ID
+   * @param style 에디터 커스텀 스타일
+   */
+  constructor(rootElementID: string, style?: StyleArgs);
+  /**
+   * EmeLine 생성자
+   * @param rootElement Eme Editor의 Dom 엘리먼트
+   * @param style 에디터 커스텀 스타일
+   */
+  constructor(rootElement: HTMLElement, style?: StyleArgs);
+  constructor(rootElementOrId: HTMLElement | string, style?: StyleArgs) {
+    if (typeof rootElementOrId == "string") {
+      let rootElement = document.getElementById(rootElementOrId);
+      if (rootElement) {
+        this.rootElement = rootElement;
+      } else {
+        throw EmeError.NOT_FOUND_ELEMENT;
+      }
+    } else {
+      this.rootElement = rootElementOrId;
+    }
 
-    const innerEmeStyle = rootElement.getAttribute("eme:style");
-    if(innerEmeStyle !== null) {
+    this.rootElement.classList.add("eme-editor");
+
+    const innerEmeStyle = this.rootElement.getAttribute("eme:style");
+    if (innerEmeStyle !== null) {
       this.style.setCustomStyle(innerEmeStyle);
-    } else if(style !== undefined) {
+    } else if (style !== undefined) {
       this.style.setCustomStyle(style);
     }
-    rootElement.setAttribute("style", this.style.innerStyle());
+    this.rootElement.setAttribute("style", this.style.innerStyle());
 
-    this.lines.push(new EmeLine(rootElement));
+    this.lines.push(new EmeLine(this.rootElement));
 
-    rootElement.addEventListener("keydown", this.onKeydown.bind(this));
-    rootElement.addEventListener("keyup", this.onKeyup.bind(this));
+    this.rootElement.addEventListener("keydown", this.onKeydown.bind(this));
+    this.rootElement.addEventListener("keyup", this.onKeyup.bind(this));
   }
 
   onKeydown(evt: KeyboardEvent) {
     // console.dir(evt.key);
-    switch(evt.key) {
+    switch (evt.key) {
       case "Shift":
         this.shiftState = true;
         break;
@@ -45,7 +68,7 @@ export class Eme {
   }
 
   onKeyup(evt: KeyboardEvent) {
-    switch(evt.key) {
+    switch (evt.key) {
       case "Shift":
         this.shiftState = false;
         break;
@@ -66,6 +89,10 @@ class EmeLine {
   private rootElement: HTMLElement;
   private lineElement: HTMLElement;
 
+  /**
+   * EmeLine 생성자
+   * @param rootElement Eme Editor의 Dom 엘리먼트
+   */
   constructor(rootElement: HTMLElement) {
     const lineElement = document.createElement("div");
     lineElement.setAttribute("contenteditable", "true");
