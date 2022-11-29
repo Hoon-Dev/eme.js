@@ -4,5 +4,8 @@
 
 .eme-editor div {
   outline: 0;
+}
+
+.eme-editor > div:not(:first-child) {
   margin-top: 4px;
 }
