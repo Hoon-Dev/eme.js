@@ -1,0 +1,8 @@
+.eme-editor p {
+  margin: 0;
+}
+
+.eme-editor div {
+  outline: 0;
+  margin-top: 4px;
+}
